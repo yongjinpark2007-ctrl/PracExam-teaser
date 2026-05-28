@@ -559,82 +559,82 @@ html, body {
   box-shadow:0 2px 16px rgba(0,0,0,.3);
 }
 .dash-hero-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:1rem;}
-.dash-hero-label{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;}
-.dash-hero-title{font-size:20px;font-weight:700;color:var(--text-main);letter-spacing:-.01em;margin-top:4px;display:flex;align-items:center;gap:10px;}
-.dash-hero-title svg{width:22px;height:22px;stroke:var(--teal);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-.dash-hero-status{font-size:11px;font-weight:700;padding:5px 11px;border-radius:8px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;flex-shrink:0;
+.dash-hero-label{font-size:14px;font-weight:700;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;}
+.dash-hero-title{font-size:27px;font-weight:700;color:var(--text-main);letter-spacing:-.01em;margin-top:5px;display:flex;align-items:center;gap:10px;}
+.dash-hero-title svg{width:29px;height:29px;stroke:var(--teal);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.dash-hero-status{font-size:14px;font-weight:700;padding:6px 12px;border-radius:8px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;flex-shrink:0;
   background:rgba(245,158,11,.1);color:var(--flag-color);border:1px solid rgba(245,158,11,.25);}
 .dash-hero-status.ready{background:rgba(34,197,94,.1);color:var(--success-color);border-color:rgba(34,197,94,.3);}
 .dash-hero-metrics{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1rem 0;}
-.dash-metric-label{font-size:11px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:6px;}
-.dash-metric-value{font-size:28px;font-weight:700;color:var(--text-main);letter-spacing:-.02em;line-height:1;}
-.dash-metric-value .pct{font-size:16px;color:var(--text-muted);font-weight:600;}
-.dash-metric-sub{font-size:12px;color:var(--text-muted);margin-top:4px;}
-.dash-metric-bar{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:8px;overflow:hidden;}
+.dash-metric-label{font-size:15px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:6px;}
+.dash-metric-value{font-size:40px;font-weight:700;color:var(--text-main);letter-spacing:-.02em;line-height:1;}
+.dash-metric-value .pct{font-size:23px;color:var(--text-muted);font-weight:600;}
+.dash-metric-sub{font-size:16px;color:var(--text-muted);margin-top:5px;}
+.dash-metric-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:9px;overflow:hidden;}
 .dash-metric-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--teal),var(--gold-light));transition:width .4s;}
 .dash-hero-target{
   background:rgba(0,196,167,.06);border:1px solid rgba(0,196,167,.18);
-  border-radius:10px;padding:10px 14px;font-size:13px;color:var(--text-mid);
-  margin:1rem 0;display:flex;align-items:center;gap:8px;
+  border-radius:10px;padding:13px 16px;font-size:17px;color:var(--text-mid);
+  margin:1rem 0;display:flex;align-items:center;gap:9px;
 }
 .dash-hero-target.warning{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.2);color:#c9a455;}
 .dash-hero-target.ready{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2);color:var(--success-color);}
-.dash-hero-target svg{width:16px;height:16px;flex-shrink:0;stroke-width:2;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;}
+.dash-hero-target svg{width:20px;height:20px;flex-shrink:0;stroke-width:2;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;}
 .dash-hero-cta{
   width:100%;background:linear-gradient(135deg,#00c4a7,#007a8a);color:#0d1520;
-  border:none;border-radius:12px;padding:13px 24px;
-  font-family:inherit;font-size:15px;font-weight:800;
+  border:none;border-radius:12px;padding:16px 24px;
+  font-family:inherit;font-size:19px;font-weight:800;
   cursor:pointer;transition:all .18s;letter-spacing:.01em;
-  display:flex;align-items:center;justify-content:center;gap:8px;
+  display:flex;align-items:center;justify-content:center;gap:9px;
 }
 .dash-hero-cta:hover{background:linear-gradient(135deg,#00e5c3,#009980);box-shadow:0 0 18px rgba(0,196,167,.3);transform:translateY(-1px);}
-.dash-hero-cta svg{width:14px;height:14px;fill:currentColor;stroke:none;}
+.dash-hero-cta svg{width:17px;height:17px;fill:currentColor;stroke:none;}
 
-/* Part 미니 그리드 */
-.dash-parts-section-label{font-size:11px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:1.5rem 4px 8px;}
-.dash-parts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.5rem;}
-.dash-mini{
+/* Part 목록 — 한 줄씩 세로 정렬 (full-width rows) */
+.dash-parts-section-label{font-size:15px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin:1.5rem 4px 10px;}
+.dash-parts-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem;}
+.dash-part-row{
   background:var(--card-bg);border:1px solid var(--border-clr);
-  border-radius:10px;padding:12px;cursor:pointer;
+  border-radius:12px;padding:16px 18px;cursor:pointer;
   transition:border-color .2s,transform .15s;
 }
-.dash-mini:hover{border-color:rgba(0,196,167,.3);transform:translateY(-1px);}
-.dash-mini.active{border:1px solid rgba(0,196,167,.4);background:rgba(0,196,167,.06);}
-.dash-mini-title{font-size:13px;font-weight:600;color:var(--text-main);margin-bottom:4px;}
-.dash-mini.active .dash-mini-title{color:var(--teal);}
-.dash-mini-stats{font-size:11px;color:var(--text-muted);}
-.dash-mini-bar{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:8px;overflow:hidden;}
-.dash-mini-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--teal),var(--gold-light));}
+.dash-part-row:hover{border-color:rgba(0,196,167,.3);transform:translateX(3px);}
+.dash-part-row.active{border:1px solid rgba(0,196,167,.4);background:rgba(0,196,167,.06);}
+.dash-part-row-name{display:flex;align-items:center;gap:11px;font-size:19px;font-weight:600;color:var(--text-main);margin-bottom:8px;}
+.dash-part-row.active .dash-part-row-name{color:var(--teal);}
+.dash-part-row-name svg{width:24px;height:24px;stroke:var(--teal);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.dash-part-row-stats{font-size:16px;color:var(--text-mid);margin-bottom:11px;}
+.dash-part-row-bar{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.dash-part-row-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--teal),var(--gold-light));}
 
 /* 약점 토픽 위젯 */
 .weak-row{
   display:flex;justify-content:space-between;align-items:center;
-  padding:10px 12px;background:rgba(255,255,255,.03);
+  padding:13px 14px;background:rgba(255,255,255,.03);
   border:1px solid var(--border-clr);border-radius:8px;
-  margin-bottom:6px;font-size:13px;
+  margin-bottom:7px;font-size:17px;
 }
 .weak-name{color:var(--text-main);}
-.weak-stat{font-size:12px;font-weight:600;}
+.weak-stat{font-size:15px;font-weight:600;}
 .weak-stat.crit{color:var(--danger-color);}
 .weak-stat.warn{color:var(--flag-color);}
 
 /* 최근 세션 컴팩트 (Dashboard 용 — 2개만) */
 .dash-recent-row{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 12px;background:var(--card-bg);
+  display:flex;align-items:center;gap:12px;
+  padding:13px 14px;background:var(--card-bg);
   border:1px solid var(--border-clr);border-radius:10px;
-  margin-bottom:6px;font-size:13px;
+  margin-bottom:7px;font-size:16px;
   cursor:pointer;transition:border-color .15s;
 }
 .dash-recent-row:hover{border-color:rgba(0,196,167,.2);}
-.dash-recent-date{font-weight:600;color:var(--text-main);font-size:12px;}
-.dash-recent-meta{color:var(--text-muted);font-size:12px;}
-.dash-recent-score{margin-left:auto;font-weight:700;font-size:13px;}
+.dash-recent-date{font-weight:600;color:var(--text-main);font-size:16px;}
+.dash-recent-meta{color:var(--text-muted);font-size:16px;}
+.dash-recent-score{margin-left:auto;font-weight:700;font-size:18px;}
 
 @media(max-width:640px){
-  .dash-parts-grid{grid-template-columns:repeat(2,1fr);}
   .dash-hero-metrics{gap:1rem;}
-  .dash-metric-value{font-size:24px;}
+  .dash-metric-value{font-size:36px;}
 }
 /* ========== END DASHBOARD V2 ========== */
 
@@ -1736,7 +1736,7 @@ function renderDashHero(focusPart){
           '<div class="dash-metric-label">정답률</div>' +
           '<div class="dash-metric-value">' + accPct + '<span class="pct">%</span></div>' +
           '<div class="dash-metric-sub">' + tCorrect + ' / ' + tAttempts + ' 정답' +
-            '<span style="font-size:10px;color:var(--text-muted);opacity:.75;"> - 반복 풀이 포함</span>' +
+            '<span style="font-size:13px;color:var(--text-muted);opacity:.75;"> - 반복 풀이 포함</span>' +
           '</div>' +
           '<div class="dash-metric-bar"><div class="dash-metric-bar-fill" style="width:' + accPct + '%"></div></div>' +
         '</div>' +
@@ -1779,16 +1779,16 @@ function renderDashPartsGrid(){
     const meta = PART_META[pk] || { label: pk };
     const shortLabel = meta.label.replace(' — ', ' · ');
     const isActive = (pk===focusPart);
-    return '<div class="dash-mini'+(isActive?' active':'')+'" onclick="dashStartFocusPart(\''+pk+'\')">'+
-      '<div class="dash-mini-title">'+shortLabel+'</div>'+
-      '<div class="dash-mini-stats">진도 '+progressPct+'% · 정답률 '+accLabel+'</div>'+
-      '<div class="dash-mini-bar"><div class="dash-mini-bar-fill" style="width:'+progressPct+'%"></div></div>'+
+    return '<div class="dash-part-row'+(isActive?' active':'')+'" onclick="dashStartFocusPart(\''+pk+'\')">'+
+      '<div class="dash-part-row-name">'+(meta.icon||'')+' '+shortLabel+'</div>'+
+      '<div class="dash-part-row-stats">진도 '+progressPct+'% · 정답률 '+accLabel+'</div>'+
+      '<div class="dash-part-row-bar"><div class="dash-part-row-bar-fill" style="width:'+progressPct+'%"></div></div>'+
     '</div>';
   }).join('');
 
   document.getElementById('dash-parts-grid-wrap').innerHTML =
     '<div class="dash-parts-section-label">전체 Part · 클릭하여 학습 시작</div>' +
-    '<div class="dash-parts-grid">' + cards + '</div>';
+    '<div class="dash-parts-list">' + cards + '</div>';
 }
 
 // Phase 2-5 에서 실제 구현 예정
