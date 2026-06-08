@@ -268,7 +268,7 @@ html, body {
 .quiz-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--teal),var(--gold-light));transition:width .3s;}
 .question-card{
   background:var(--card-bg);border:1px solid var(--border-clr);
-  border-radius:16px;padding:1.5rem;margin-bottom:1rem;
+  border-radius:16px;padding:1.5rem 1.5rem 0;margin-bottom:1rem;
   box-shadow:0 2px 16px rgba(0,0,0,.35);
 }
 .question-meta{display:flex;align-items:center;gap:6px;margin-bottom:1rem;flex-wrap:wrap;}
@@ -319,43 +319,50 @@ html, body {
   color:var(--flag-color);
   background:rgba(245,158,11,.06);
 }
-.question-text{font-size:20px;line-height:1.75;color:var(--text-main);font-weight:500;}
-.options-list{display:flex;flex-direction:column;gap:8px;margin-top:1.25rem;}
+.question-text{font-size:19px;line-height:1.75;color:var(--text-main);font-weight:500;}
+
+/* ── OPTIONS: Design A — Document Flow ── */
+.options-list{display:flex;flex-direction:column;gap:0;margin:1rem -1.5rem 0;border-top:1px solid var(--border-clr);}
 .option-btn{
-  background:rgba(255,255,255,.03);
-  border:1px solid var(--border-clr);
-  border-radius:12px;padding:13px 16px;
+  background:transparent;border:none;border-bottom:1px solid var(--border-clr);
+  border-radius:0;padding:16px 1.5rem;
   display:flex;align-items:flex-start;gap:12px;
-  cursor:pointer;transition:all .15s;
-  text-align:left;width:100%;font-family:inherit;color:var(--text-main);
+  cursor:pointer;transition:background .12s;
+  text-align:left;width:100%;font-family:inherit;
+  position:relative;
 }
-@media(hover:hover){.option-btn:hover:not(:disabled):not(.sel){
-/* Touch :active — 모든 기기에서 작동 (hover 미디어쿼리 밖) */
-.option-btn:active:not(:disabled){opacity:.72;transform:scale(.99);}
+.option-btn:last-of-type{border-bottom:none;padding-bottom:1.5rem;}
+.option-btn::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background .12s;}
+@media(hover:hover){.option-btn:hover:not(:disabled):not(.sel):not(.correct-ans):not(.wrong-ans):not(.reveal){background:rgba(255,255,255,.04);}}
+/* Touch :active — 모든 기기 작동 */
+.option-btn:active:not(:disabled):not(.sel){opacity:.82;}
 .mode-btn:active{opacity:.78;transform:scale(.98);}
 .filter-chip:active{opacity:.75;transform:scale(.97);}
 .btn-primary:active,.btn-submit:active{opacity:.82;transform:translateY(0);}
 .btn-ghost:active,.btn-navy:active{opacity:.75;}
 .dash-part-row:active{opacity:.85;transform:translateX(4px);}
 .dash-hero-cta:active{transform:translateY(0);opacity:.85;}
-  border-color:rgba(0,196,167,.3);
-  background:rgba(0,196,167,.05);
-}}
-.option-btn.sel{border-color:rgba(0,196,167,.4);background:rgba(0,196,167,.1);}
-.option-btn.sel .opt-letter{background:var(--teal);color:#0d1520;}
-.option-btn.correct-ans{border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.08);}
-.option-btn.correct-ans .opt-letter{background:#4ade80;color:#0d1520;}
-.option-btn.wrong-ans{border-color:rgba(244,63,94,.35);background:rgba(244,63,94,.06);}
-.option-btn.wrong-ans .opt-letter{background:#f43f5e;color:#fff;}
-.option-btn.reveal{border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.05);}
-.option-btn.reveal .opt-letter{background:rgba(74,222,128,.15);color:#4ade80;}
-.opt-letter{
-  width:32px;height:32px;border-radius:7px;
-  background:rgba(255,255,255,.07);
-  flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  font-size:14px;font-weight:700;color:var(--text-muted);transition:all .15s;
-}
-.opt-text{font-size:18px;line-height:1.65;padding-top:3px;color:var(--text-main);}
+/* Selected */
+.option-btn.sel{background:rgba(0,196,167,.07);}
+.option-btn.sel::before{background:var(--teal);}
+.option-btn.sel .opt-letter{color:var(--teal);font-weight:700;}
+.option-btn.sel .opt-text{color:var(--text-main);}
+/* Correct */
+.option-btn.correct-ans{background:rgba(74,222,128,.07);}
+.option-btn.correct-ans::before{background:var(--success-color);}
+.option-btn.correct-ans .opt-letter{color:var(--success-color);font-weight:700;}
+.option-btn.correct-ans .opt-text{color:var(--text-main);}
+/* Wrong (selected, incorrect) */
+.option-btn.wrong-ans{background:rgba(244,63,94,.06);}
+.option-btn.wrong-ans::before{background:var(--danger-color);}
+.option-btn.wrong-ans .opt-letter{color:var(--danger-color);font-weight:700;}
+/* Reveal (correct answer shown after wrong pick) */
+.option-btn.reveal{background:rgba(74,222,128,.05);}
+.option-btn.reveal::before{background:var(--success-color);opacity:.6;}
+.option-btn.reveal .opt-letter{color:var(--success-color);font-weight:700;opacity:.8;}
+/* Letter — plain text, no badge circle */
+.opt-letter{font-size:19px;font-weight:600;color:var(--text-muted);flex-shrink:0;min-width:22px;margin-top:0;transition:color .12s;}
+.opt-text{font-size:19px;line-height:1.7;color:var(--text-mid);}
 
 /* SUBMIT BAR */
 .submit-bar{display:flex;gap:8px;margin-top:1rem;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px);flex-wrap:wrap;}
@@ -380,33 +387,22 @@ html, body {
 .btn-submit:disabled{opacity:.3;cursor:not-allowed;box-shadow:none;}
 
 /* EXPLANATION */
-.explanation-card{
-  background:var(--card-bg);border:1px solid var(--border-clr);
-  border-radius:14px;padding:1.25rem;margin-top:1rem;
-  display:none;box-shadow:0 2px 12px rgba(0,0,0,.3);
-}
+/* ── EXPLANATION — 둥근 카드 (Design A 옵션 스타일 유지, 해설은 카드) ── */
+.explanation-card{background:var(--card-bg);border:1px solid var(--border-clr);border-radius:14px;padding:1.25rem;margin-top:1rem;display:none;}
 .explanation-card.visible{display:block;}
-.result-banner{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;margin-bottom:1rem;font-size:17px;font-weight:600;}
-.result-banner.ok{background:rgba(255,255,255,.06);color:var(--text-main);border:1px solid rgba(255,255,255,.12);}
-.result-banner.fail{background:rgba(255,255,255,.04);color:var(--text-muted);border:1px solid rgba(255,255,255,.08);}
+.result-banner{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;margin-bottom:1rem;font-size:16px;font-weight:600;}
+.result-banner.ok{background:rgba(74,222,128,.1);color:var(--success-color);border:1px solid rgba(74,222,128,.25);}
+.result-banner.fail{background:rgba(244,63,94,.08);color:var(--danger-color);border:1px solid rgba(244,63,94,.2);}
 .exp-section{margin-bottom:1rem;}
 .exp-body{font-size:17px;line-height:1.85;color:var(--text-mid);letter-spacing:-.01em;word-break:break-word;overflow-wrap:anywhere;}
 .exp-body strong{color:var(--text-main);font-weight:600;}
 
-/* UPDATE & TIP BOXES */
-.update-box{
-  background:rgba(245,158,11,.06);
-  border:1px solid rgba(245,158,11,.2);
-  border-radius:12px;padding:14px 16px;margin:10px 0;
-}
-.update-label{font-size:11px;font-weight:700;color:var(--flag-color);letter-spacing:.08em;margin-bottom:8px;text-transform:uppercase;}
-.update-body{font-size:17px;line-height:1.8;color:#f59e0b;word-break:break-word;overflow-wrap:anywhere;}
-.tip-box{
-  background:rgba(0,196,167,.06);
-  border:1px solid rgba(0,196,167,.18);
-  border-radius:12px;padding:14px 16px;margin:10px 0;
-}
-.tip-label{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.08em;margin-bottom:8px;text-transform:uppercase;}
+/* UPDATE & TIP — left-border callout (카드 안에) */
+.update-box{background:rgba(245,158,11,.05);border-left:3px solid var(--flag-color);border-radius:0 8px 8px 0;padding:12px 14px;margin:10px 0;}
+.update-label{font-size:11px;font-weight:700;color:var(--flag-color);letter-spacing:.08em;margin-bottom:6px;text-transform:uppercase;}
+.update-body{font-size:17px;line-height:1.8;color:var(--text-mid);word-break:break-word;overflow-wrap:anywhere;}
+.tip-box{background:rgba(0,196,167,.05);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:12px 14px;margin:10px 0;}
+.tip-label{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.08em;margin-bottom:6px;text-transform:uppercase;}
 .tip-body{font-size:17px;line-height:1.8;color:var(--text-mid);word-break:break-word;overflow-wrap:anywhere;}
 
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -634,22 +630,23 @@ html, body {
   .result-breakdown{grid-template-columns:1fr 1fr;}
   .screen{padding:1rem;overflow-wrap:anywhere;}
   .question-text{font-size:18px;line-height:1.75;word-break:break-word;overflow-wrap:anywhere;}
-  .opt-text{font-size:17px;line-height:1.7;}
+  .opt-text{font-size:17px;line-height:1.75;}
   .exp-body{font-size:19px;line-height:1.85;overflow-wrap:anywhere;}
   .update-body{font-size:19px;line-height:1.85;overflow-wrap:anywhere;}
   .tip-body{font-size:19px;line-height:1.85;overflow-wrap:anywhere;}
-  .result-banner{font-size:16px;}
+  .result-banner{font-size:14px;padding:9px 0;}
   .exp-section{margin-bottom:.7rem;}
-  .update-box,.tip-box{margin:8px 0;}
-  .unit-name{font-size:15px;}
+  .update-box,.tip-box{margin:8px 0;padding:10px 13px;}
+  .options-list{margin:1rem -1rem 0;}
+  .option-btn{padding:14px 1rem;}
   .unit-stats{font-size:14px;}
   .stat-label{font-size:14px;}
   .stat-value{font-size:32px;}
   .bm-q{font-size:16px;}
   .bm-tag{font-size:13px;}
   .section-title{font-size:21px;}
-  .explanation-card{padding:1rem;}
-  .update-box,.tip-box{padding:10px 13px;}
+
+
   .header-sub{display:none;}
   .header-nav{display:none;}
   .hamburger-btn{display:flex;}
