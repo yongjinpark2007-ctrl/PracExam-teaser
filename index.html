@@ -2439,7 +2439,6 @@ function showResults(){
   S.sessions.push(sessionRecord);
   const returnDest = S.returnTo || null;
   clearLiveQuiz();
-  S.returnTo = null;
   saveSessionToCloud(answered, correct, pct, completedQueue).then(saved=>{
     if(saved && saved.id){
       const last = S.sessions[S.sessions.length-1];
@@ -2559,6 +2558,7 @@ function retryFlagged(id){
   S.quizIdx = 0; S.submitted = false; S.selected = null;
   S.reviewMode = false;
   S.retryFlaggedMode = true;
+  S.returnTo = 'bookmarks';
   S.mode = 'normal';
   S.sessionAnswers = new Array(S.quizQueue.length).fill(null);
   S.results = {correct:0, wrong:0, total:S.quizQueue.length};
