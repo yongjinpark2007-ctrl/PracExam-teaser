@@ -189,12 +189,19 @@ html, body {
 .sts-topic-bar{display:inline-block;height:6px;border-radius:3px;background:var(--teal);margin-left:6px;vertical-align:middle;}
 
 /* 세션 목록 */
-.sts-sess-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-clr);font-size:13px;}
+.sts-sess-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border-clr);font-size:13px;}
 .sts-sess-row:last-child{border-bottom:none;}
 .sts-sess-date{color:var(--text-muted);flex:0 0 110px;}
 .sts-sess-meta{color:var(--text-muted);flex:1;}
-.sts-sess-pct{font-weight:700;width:40px;text-align:right;}
+.sts-sess-pct{font-weight:700;width:40px;text-align:right;flex-shrink:0;}
+.sts-sess-retry{padding:4px 10px;font-size:11px;font-weight:600;background:rgba(26,58,92,.08);border:1px solid var(--border-clr);border-radius:6px;color:var(--teal);cursor:pointer;flex-shrink:0;white-space:nowrap;}
+.sts-sess-retry:hover{background:rgba(26,58,92,.15);border-color:var(--teal);}
 .sts-empty{text-align:center;padding:2rem;color:var(--text-muted);font-size:14px;}
+/* Part 필터 탭 */
+.sts-filter-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem;}
+.sts-filter-btn{padding:5px 13px;font-size:12px;font-weight:600;border:1px solid var(--border-clr);border-radius:20px;background:var(--card-bg);color:var(--text-muted);cursor:pointer;transition:all .15s;}
+.sts-filter-btn:hover{border-color:var(--teal);color:var(--teal);}
+.sts-filter-btn.active{background:var(--teal);border-color:var(--teal);color:#fff;}
 
 /* GRID */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.5rem;}
@@ -773,6 +780,8 @@ html, body {
   .sts-bar-label{width:44px;font-size:12px;}
   .sts-sess-date{flex:0 0 80px;}
   .sts-topic-table{font-size:12px;}
+  .sts-filter-btn{padding:4px 10px;font-size:11px;}
+  .sts-sess-retry{font-size:10px;padding:3px 8px;}
 }
 </style>
 </head>
@@ -1071,19 +1080,22 @@ html, body {
     <div style="font-size:13px;color:var(--text-muted);">학습 추세 · Part별 누적 성취도 · 토픽별 분석</div>
   </div>
 
+  <!-- Part 필터 -->
+  <div class="sts-filter-wrap" id="sts-filter-wrap"></div>
+
   <!-- 요약 카드 4개 -->
   <div class="sts-summary-grid" id="sts-summary"></div>
 
   <!-- 점수 추세 라인차트 -->
   <div class="sts-section">
-    <div class="sts-section-title">점수 추세 (최근 20세션)</div>
+    <div class="sts-section-title" id="sts-trend-title">점수 추세 (최근 20세션)</div>
     <div class="sts-chart-wrap" id="sts-trend-wrap">
       <div class="sts-empty">세션 데이터 로딩 중…</div>
     </div>
   </div>
 
   <!-- Part별 정답률 -->
-  <div class="sts-section">
+  <div class="sts-section" id="sts-parts-section">
     <div class="sts-section-title">Part별 누적 정답률</div>
     <div id="sts-parts"></div>
   </div>
@@ -1323,6 +1335,7 @@ async function loadFromCloud(){
       created_at: r.created_at,
       date: new Date(r.created_at).toLocaleDateString('ko-KR',{month:'short',day:'numeric',year:'numeric'}),
       count: r.count, correct: r.correct, pct: r.pct,
+      part: r.part || null,
       question_ids: r.question_ids || []
     }));
 
@@ -1362,13 +1375,15 @@ async function saveProgressToCloud(questionId, isCorrect, isFlagged){
   }, { onConflict: 'user_id,question_id' });
 }
 
-async function saveSessionToCloud(count, correct, pct, questionIds){
+async function saveSessionToCloud(count, correct, pct, questionIds, part){
   if(!SB_USER) return null;
-  const { data, error } = await sb.from('sessions').insert({
+  const row = {
     user_id: SB_USER.id,
     count, correct, pct,
     question_ids: questionIds || []
-  }).select().single();
+  };
+  if(part) row.part = part;
+  const { data, error } = await sb.from('sessions').insert(row).select().single();
   if(error){ console.warn('session save:', error); return null; }
   return data;
 }
@@ -2501,16 +2516,18 @@ function showResults(){
   const {correct,wrong,total}=S.results, answered=correct+wrong;
   const pct=answered>0?Math.round(correct/answered*100):0;
   const completedQueue = [...S.quizQueue];
+  const sessionPart = S.part && S.part !== 'all' ? S.part : null;
   const sessionRecord = {
     date: new Date().toLocaleDateString('ko-KR',{month:'short',day:'numeric',year:'numeric'}),
     count: answered, correct, pct,
+    part: sessionPart,
     question_ids: completedQueue,
     created_at: new Date().toISOString()
   };
   S.sessions.push(sessionRecord);
   const returnDest = S.returnTo || null;
   clearLiveQuiz();
-  saveSessionToCloud(answered, correct, pct, completedQueue).then(saved=>{
+  saveSessionToCloud(answered, correct, pct, completedQueue, sessionPart).then(saved=>{
     if(saved && saved.id){
       const last = S.sessions[S.sessions.length-1];
       if(last) last.id = saved.id;
@@ -2531,6 +2548,10 @@ function showResults(){
       btns.innerHTML =
         '<button class="btn-navy" style="flex:1;" onclick="showScreen(\'bookmarks\');switchReviewTab(\'sessions\')">Review로 돌아가기</button>' +
         '<button class="btn-primary" style="flex:1;" onclick="clearLiveQuiz();showScreen(\'quiz-setup\')">New Session →</button>';
+    } else if(returnDest === 'statistics'){
+      btns.innerHTML =
+        '<button class="btn-navy" style="flex:1;" onclick="showScreen(\'statistics\')">Statistics로 돌아가기</button>' +
+        '<button class="btn-primary" style="flex:1;" onclick="clearLiveQuiz();showScreen(\'quiz-setup\')">New Session →</button>';
     } else {
       btns.innerHTML =
         '<button class="btn-navy" style="flex:1;" onclick="showScreen(\'dashboard\')">Dashboard</button>' +
@@ -2546,7 +2567,10 @@ function showResults(){
 // ══════════════════════════════════════════════════════
 // PHASE 4: STATISTICS
 // ══════════════════════════════════════════════════════
+var stsFilterPart = 'all'; // 현재 선택된 Part 필터
+
 function renderStatistics(){
+  renderStsFilterTabs();
   renderStsSummary();
   renderStsTrend();
   renderStsParts();
@@ -2554,18 +2578,51 @@ function renderStatistics(){
   renderStsSessions();
 }
 
+function renderStsFilterTabs(){
+  var wrap = document.getElementById('sts-filter-wrap');
+  if(!wrap) return;
+  // 실제 데이터가 있는 Part만 추출
+  var partsWithData = [];
+  var allParts = ['Part 1','Part 2','Part 3','Part A','Part B','Part C'];
+  allParts.forEach(function(p){
+    var hasQ = S.questions.some(function(q){ return q.part === p; });
+    if(hasQ) partsWithData.push(p);
+  });
+  var tabs = ['all'].concat(partsWithData);
+  wrap.innerHTML = tabs.map(function(p){
+    var lbl = p === 'all' ? '전체' : p;
+    var active = stsFilterPart === p ? ' active' : '';
+    return '<button class="sts-filter-btn'+active+'" onclick="setStsFilter(\''+p+'\')">'+lbl+'</button>';
+  }).join('');
+}
+
+function setStsFilter(part){
+  stsFilterPart = part;
+  renderStsFilterTabs();
+  renderStsSummary();
+  renderStsTrend();
+  // Part별 막대: 전체 필터일 때만 표시
+  var partsSection = document.getElementById('sts-parts-section');
+  if(partsSection) partsSection.style.display = stsFilterPart === 'all' ? '' : 'none';
+  renderStsTopics();
+  renderStsSessions();
+}
+
 function renderStsSummary(){
   var el = document.getElementById('sts-summary');
   if(!el) return;
-  var totalSessions = S.sessions.length;
-  var totalAnswered = S.sessions.reduce(function(a,s){ return a + (s.count||0); }, 0);
-  var allPcts = S.sessions.filter(function(s){ return s.count > 0; }).map(function(s){ return s.pct||0; });
+  var filteredSessions = S.sessions.filter(function(s){
+    if(stsFilterPart === 'all') return s.count > 0;
+    return s.count > 0 && s.part === stsFilterPart;
+  });
+  var totalSessions = filteredSessions.length;
+  var totalAnswered = filteredSessions.reduce(function(a,s){ return a + (s.count||0); }, 0);
+  var allPcts = filteredSessions.map(function(s){ return s.pct||0; });
   var avgPct = allPcts.length ? Math.round(allPcts.reduce(function(a,v){ return a+v; },0) / allPcts.length) : 0;
   var bestPct = allPcts.length ? Math.max.apply(null, allPcts) : 0;
-  var flagCount = S.flagged.size;
 
   el.innerHTML = [
-    {val: totalSessions, lbl: '총 세션'},
+    {val: totalSessions, lbl: '세션'},
     {val: totalAnswered, lbl: '총 풀이'},
     {val: avgPct + '%', lbl: '평균 정답률'},
     {val: bestPct + '%', lbl: '최고 점수'},
@@ -2579,12 +2636,18 @@ function renderStsSummary(){
 
 function renderStsTrend(){
   var wrap = document.getElementById('sts-trend-wrap');
+  var titleEl = document.getElementById('sts-trend-title');
   if(!wrap) return;
-  var sessions = S.sessions.filter(function(s){ return s.count > 0; });
-  // 최신순 정렬 후 최근 20개, 차트는 오래된 것부터
+  var sessions = S.sessions.filter(function(s){
+    if(stsFilterPart === 'all') return s.count > 0;
+    return s.count > 0 && s.part === stsFilterPart;
+  });
   var sorted = sessions.slice().sort(function(a,b){
     return new Date(b.created_at||0) - new Date(a.created_at||0);
   }).slice(0,20).reverse();
+
+  var partLabel = stsFilterPart === 'all' ? '' : ' · ' + stsFilterPart;
+  if(titleEl) titleEl.textContent = '점수 추세 (최근 20세션' + partLabel + ')';
 
   if(sorted.length < 2){
     wrap.innerHTML = '<div class="sts-empty">세션이 2개 이상 있어야 추세 차트를 볼 수 있습니다</div>';
@@ -2601,14 +2664,11 @@ function renderStsTrend(){
   function xPos(i){ return PL + (i/(sorted.length-1)) * cW; }
   function yPos(v){ return PT + (1-(v-minV)/(maxV-minV)) * cH; }
 
-  // 폴리라인 포인트
   var polyline = sorted.map(function(s,i){ return xPos(i)+','+yPos(s.pct||0); }).join(' ');
-  // 영역 채우기 경로
   var fillPath = 'M'+xPos(0)+','+yPos(sorted[0].pct||0)+' ' +
     sorted.map(function(s,i){ return 'L'+xPos(i)+','+yPos(s.pct||0); }).join(' ') +
     ' L'+xPos(sorted.length-1)+','+(PT+cH)+' L'+xPos(0)+','+(PT+cH)+' Z';
 
-  // Y축 라벨 (0,50,100 중 범위에 있는 것)
   var yLabels = [0,25,50,75,100].filter(function(v){ return v>=minV-5 && v<=maxV+5; });
   var yLabelsSvg = yLabels.map(function(v){
     var y = yPos(v);
@@ -2616,9 +2676,8 @@ function renderStsTrend(){
            '<text x="'+(PL-4)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" fill="rgba(0,0,0,.35)">'+v+'</text>';
   }).join('');
 
-  // X축 날짜 라벨 (최대 5개)
   var xStep = Math.max(1, Math.floor(sorted.length/5));
-  var xLabelsSvg = sorted.filter(function(_,i){ return i%xStep===0 || i===sorted.length-1; }).map(function(s,_,arr){
+  var xLabelsSvg = sorted.filter(function(_,i){ return i%xStep===0 || i===sorted.length-1; }).map(function(s){
     var i = sorted.indexOf(s);
     var lbl = '';
     if(s.created_at){ var d=new Date(s.created_at); lbl=(d.getMonth()+1)+'/'+(d.getDate()); }
@@ -2626,10 +2685,9 @@ function renderStsTrend(){
     return '<text x="'+xPos(i)+'" y="'+(H-4)+'" text-anchor="middle" font-size="10" fill="rgba(0,0,0,.35)">'+lbl+'</text>';
   }).join('');
 
-  // 데이터 포인트 (최신 점 강조)
   var dotsSvg = sorted.map(function(s,i){
     var isLast = i===sorted.length-1;
-    var col = (s.pct||0)>=80?'#16a34a':(s.pct||0)>=60?'#d97706':'#dc2626';
+    var col = (s.pct||0)>=80?'var(--success-color)':(s.pct||0)>=60?'var(--flag-color)':'var(--danger-color)';
     return '<circle cx="'+xPos(i)+'" cy="'+yPos(s.pct||0)+'" r="'+(isLast?4:3)+'" fill="'+col+'" stroke="#fff" stroke-width="1.5"/>';
   }).join('');
 
@@ -2679,9 +2737,9 @@ function renderStsParts(){
 function renderStsTopics(){
   var tbody = document.getElementById('sts-topics-body');
   if(!tbody) return;
-  // 토픽별 집계
   var map = {};
   S.questions.forEach(function(q){
+    if(stsFilterPart !== 'all' && q.part !== stsFilterPart) return;
     var topic = q.topic || 'General';
     var a = S.answered[q.id];
     if(!a || !a.times) return;
@@ -2692,7 +2750,7 @@ function renderStsTopics(){
   var rows = Object.values(map)
     .filter(function(r){ return r.times >= 5; })
     .map(function(r){ r.pct = Math.round(r.correct/r.times*100); return r; })
-    .sort(function(a,b){ return a.pct - b.pct; }); // 정답률 낮은 순 (약점 우선)
+    .sort(function(a,b){ return a.pct - b.pct; });
 
   if(!rows.length){
     tbody.innerHTML = '<tr><td colspan="4" class="sts-empty">5회 이상 시도한 토픽이 없습니다</td></tr>';
@@ -2700,7 +2758,7 @@ function renderStsTopics(){
   }
   tbody.innerHTML = rows.map(function(r){
     var color = r.pct>=80?'var(--success-color)':r.pct>=60?'var(--flag-color)':'var(--danger-color)';
-    var barW = Math.round(r.pct * 0.6); // max 60px
+    var barW = Math.round(r.pct * 0.6);
     return '<tr>' +
       '<td>'+r.topic+'</td>' +
       '<td style="color:var(--text-muted);">'+r.part+'</td>' +
@@ -2717,7 +2775,10 @@ function renderStsSessions(){
   var el = document.getElementById('sts-sessions');
   var cnt = document.getElementById('sts-sess-count');
   if(!el) return;
-  var sessions = S.sessions.filter(function(s){ return s.count > 0; }).slice().sort(function(a,b){
+  var sessions = S.sessions.filter(function(s){
+    if(stsFilterPart === 'all') return s.count > 0;
+    return s.count > 0 && s.part === stsFilterPart;
+  }).slice().sort(function(a,b){
     return new Date(b.created_at||0) - new Date(a.created_at||0);
   });
   if(cnt) cnt.textContent = '(' + sessions.length + '개)';
@@ -2733,12 +2794,26 @@ function renderStsSessions(){
               d.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false});
     }
     var color = (s.pct||0)>=80?'var(--success-color)':(s.pct||0)>=60?'var(--flag-color)':'var(--danger-color)';
+    var partTag = s.part ? s.part : 'All';
+    var retryBtn = '';
+    if(s.question_ids && s.question_ids.length > 0){
+      var realIdx = S.sessions.indexOf(s);
+      retryBtn = '<button class="sts-sess-retry" onclick="reviewSessionFromStats('+realIdx+')">다시 풀기</button>';
+    }
     return '<div class="sts-sess-row">' +
       '<span class="sts-sess-date">'+label+'</span>' +
-      '<span class="sts-sess-meta">'+(s.part||'All')+' · '+s.count+'문제</span>' +
+      '<span class="sts-sess-meta">'+partTag+' · '+s.count+'문제</span>' +
       '<span class="sts-sess-pct" style="color:'+color+';">'+(s.pct||0)+'%</span>' +
+      retryBtn +
     '</div>';
   }).join('');
+}
+
+// Statistics에서 세션 다시 풀기 — 종료 후 Statistics 탭으로 복귀
+function reviewSessionFromStats(sessionIndex){
+  reviewSession(sessionIndex);
+  // reviewSession이 returnTo='bookmarks'로 설정하므로 override
+  S.returnTo = 'statistics';
 }
 
 function switchReviewTab(tab){
