@@ -322,6 +322,7 @@ html, body {
   background:var(--card-bg);border:1px solid var(--border-clr);
   border-radius:16px;padding:1.5rem 1.5rem 0;margin-bottom:1rem;
   box-shadow:0 1px 6px rgba(0,0,0,.08);
+  overflow:hidden;
 }
 .question-meta{display:flex;align-items:center;gap:6px;margin-bottom:1rem;flex-wrap:wrap;overflow:hidden;}
 
@@ -375,7 +376,7 @@ html, body {
 }
 .question-text{font-size:19px;line-height:1.75;color:var(--text-main);font-weight:500;}
 
-/* ── OPTIONS: Design A — Document Flow ── */
+/* ── OPTIONS: 카드 내부 flow ── */
 .options-list{display:flex;flex-direction:column;gap:0;margin:1rem -1.5rem 0;border-top:1px solid var(--border-clr);}
 .option-btn{
   background:transparent;border:none;border-bottom:1px solid var(--border-clr);
@@ -744,8 +745,8 @@ html, body {
   /* ── Quiz ── */
   .question-text{font-size:18px;line-height:1.75;word-break:break-word;overflow-wrap:anywhere;}
   .opt-text{font-size:17px;line-height:1.75;}
-  .options-list{margin:1rem -1rem 0;}
-  .option-btn{padding:14px 1rem;}
+  .options-list{margin:1rem -1.5rem 0;}
+  .option-btn{padding:14px 1.5rem;}
   .q-badge-gray{max-width:46vw;}
 
   /* ── Submit bar (5-button) — 모바일 2행 배치 ── */
