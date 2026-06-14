@@ -1080,7 +1080,7 @@ html, body {
   </div>
 </div>
 
-<!-- ═══ STATISTICS (Phase 1 skeleton — Phase 4에서 콘텐츠 추가) ═══ -->
+<!-- ═══ STATISTICS (Phase 4 완료 — 2026-06-13) ═══ -->
 <div id="screen-statistics" class="screen">
   <div style="margin-bottom:1.25rem;">
     <div class="section-title">Statistics</div>
@@ -2651,7 +2651,10 @@ function showResults(){
 // ══════════════════════════════════════════════════════
 // PHASE 4: STATISTICS
 // ══════════════════════════════════════════════════════
+const STS_SESS_PAGE = 20;
+let stsSessionsShown = STS_SESS_PAGE;
 function renderStatistics(){
+  stsSessionsShown = STS_SESS_PAGE;
   renderStsSummary();
   renderStsTrend();
   renderStsParts();
@@ -2830,7 +2833,8 @@ function renderStsSessions(){
     el.innerHTML = '<div class="sts-empty">세션 기록이 없습니다</div>';
     return;
   }
-  el.innerHTML = sessions.map(function(s){
+  var shown = sessions.slice(0, stsSessionsShown);
+  var html = shown.map(function(s){
     var label = s.date || '';
     if(s.created_at){
       var d = new Date(s.created_at);
@@ -2844,6 +2848,19 @@ function renderStsSessions(){
       '<span class="sts-sess-pct" style="color:'+color+';">'+(s.pct||0)+'%</span>' +
     '</div>';
   }).join('');
+  if(sessions.length > shown.length){
+    html += '<div style="text-align:center;padding-top:12px;">' +
+      '<button class="btn-ghost" style="font-size:13px;padding:8px 18px;" onclick="loadMoreStsSessions()">' +
+        '더 보기 (' + shown.length + ' / ' + sessions.length + ')' +
+      '</button>' +
+    '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function loadMoreStsSessions(){
+  stsSessionsShown += STS_SESS_PAGE;
+  renderStsSessions();
 }
 
 function switchReviewTab(tab){
