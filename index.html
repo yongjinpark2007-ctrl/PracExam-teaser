@@ -54,6 +54,9 @@
   --gold:         #6FA39E;              /* Seafoam accent */
   --gold-light:   #A3C6C4;
   --silver:       #6C7A89;              /* Steel Gray */
+  --accent:       #DD8F75;              /* Terracotta — NEW 배지, 강조 포인트 */
+  --accent-tint:  #FBF1EC;              /* Dusty Pink tint — Tip 박스 배경 */
+  --accent-border:#EFD0C1;              /* Dusty Pink — Tip 박스 보더 */
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 
@@ -576,8 +579,8 @@ html, body {
 .update-box{background:rgba(245,158,11,.05);border-left:3px solid var(--flag-color);border-radius:0 8px 8px 0;padding:12px 14px;margin:10px 0;}
 .update-label{font-size:11px;font-weight:700;color:var(--flag-color);letter-spacing:.08em;margin-bottom:6px;text-transform:uppercase;}
 .update-body{font-size:17px;line-height:1.8;color:var(--text-mid);word-break:break-word;overflow-wrap:anywhere;}
-.tip-box{background:rgba(53,70,73,.05);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:12px 14px;margin:10px 0;}
-.tip-label{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.08em;margin-bottom:6px;text-transform:uppercase;}
+.tip-box{background:var(--accent-tint);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 14px;margin:10px 0;}
+.tip-label{font-size:11px;font-weight:700;color:#b85f3f;letter-spacing:.08em;margin-bottom:6px;text-transform:uppercase;}
 .tip-body{font-size:17px;line-height:1.8;color:var(--text-mid);word-break:break-word;overflow-wrap:anywhere;}
 
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
