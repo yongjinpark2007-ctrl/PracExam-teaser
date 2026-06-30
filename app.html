@@ -1521,7 +1521,13 @@ function showLgErr(msg){
 
 async function doLogout(){
   if(!confirm('로그아웃 하시겠습니까?')) return;
-  await sb.auth.signOut();
+  try{
+    // signOut이 네트워크/lock에서 멈춰도 2초 후 강제 진행 (로그아웃 갇힘 방지)
+    await Promise.race([
+      sb.auth.signOut({ scope: 'local' }),
+      new Promise(function(res){ setTimeout(res, 2000); })
+    ]);
+  }catch(e){ console.warn('signOut 실패, 강제 로그아웃 진행:', e); }
   SB_USER = null;
   location.reload();
 }
@@ -1529,18 +1535,23 @@ async function doLogout(){
 // ── SESSION 초기화 (이메일 인증 링크 자동 로그인 + 기존 세션 복원) ──
 
 // ① 이메일 인증 링크 클릭 시 #access_token 해시 자동 처리
-sb.auth.onAuthStateChange(async function(event, session){
+sb.auth.onAuthStateChange(function(event, session){
   if(event === 'SIGNED_IN' && session && !_sessionHandled){
     _sessionHandled = true;
     SB_USER = session.user;
-    applyAdminVisibility();
-    document.getElementById('login-gate').style.display = 'none';
-    // 주소표시줄에서 access_token 해시 제거
-    if(window.location.hash && window.location.hash.indexOf('access_token') !== -1){
-      history.replaceState(null, '', window.location.pathname);
-    }
-    await loadFromCloud();
-    updateSyncStatus();
+    // ⚠️ supabase-js v2: onAuthStateChange 콜백은 auth lock(navigator.locks)을
+    //    쥔 상태로 실행된다. 콜백 안에서 sb.from(...)/sb.auth.* 를 직접 await 하면
+    //    같은 lock을 재요청해 데드락 → 모든 후속 sb.* 호출이 영영 멈춘다.
+    //    setTimeout(0)으로 콜백을 즉시 반환(lock 해제)한 뒤 밖에서 실행한다.
+    setTimeout(function(){
+      applyAdminVisibility();
+      document.getElementById('login-gate').style.display = 'none';
+      // 주소표시줄에서 access_token 해시 제거
+      if(window.location.hash && window.location.hash.indexOf('access_token') !== -1){
+        history.replaceState(null, '', window.location.pathname);
+      }
+      loadFromCloud().then(updateSyncStatus);
+    }, 0);
   }
 });
 
