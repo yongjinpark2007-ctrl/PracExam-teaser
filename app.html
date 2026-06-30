@@ -1237,7 +1237,6 @@ html, body {
   <div class="question-card">
     <div class="question-meta">
       <span class="q-badge" id="q-part">Part 1</span>
-      <span class="q-badge-gray" id="q-topic">Topic</span>
       <span class="q-id-badge" id="q-id-badge" style="display:none;"></span>
       <button class="q-copy-btn" id="q-copy-btn" onclick="copyQuestion()" title="Copy question & options to clipboard"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
       <button class="q-flag-btn" id="q-flag-btn" onclick="toggleFlag()"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg> Flag</button>
@@ -1257,6 +1256,9 @@ html, body {
   <div class="explanation-card" id="explanation-card">
     <div class="result-banner" id="result-banner"></div>
     <div id="correction-box"></div>
+    <div style="margin-bottom:1rem;">
+      <span class="q-badge-gray" id="exp-topic-badge">Topic</span>
+    </div>
 
     <div class="exp-section">
       <div class="exp-label">Explanation</div>
@@ -1428,7 +1430,7 @@ html, body {
     <button class="btn-ghost" style="margin-top:12px;width:100%;color:#f43f5e;border-color:rgba(244,63,94,.3);" onclick="doLogout()">🚪 로그아웃</button>
   </div>
 
-  <div style="background:var(--card-bg);border:1px solid var(--border-clr);border-radius:14px;padding:1.25rem;margin-top:1rem;">
+  <div id="settings-data-mgmt" style="background:var(--card-bg);border:1px solid var(--border-clr);border-radius:14px;padding:1.25rem;margin-top:1rem;">
     <div class="exp-label" style="margin-bottom:10px;">데이터 관리</div>
     <button class="btn-ghost" style="margin-bottom:10px;width:100%;" onclick="exportData()">모든 데이터 내보내기 (JSON)</button>
     <button class="btn-ghost" style="width:100%;color:#dc2626;border-color:rgba(220,38,38,.3);" onclick="if(confirm('모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.'))resetData()">모든 데이터 초기화</button>
@@ -1466,9 +1468,32 @@ const ADMIN_UID = 'f80cf93f-066f-415d-8925-a2e848dccaa3';
 function applyAdminVisibility(){
   var isAdmin = SB_USER && SB_USER.id === ADMIN_UID;
   var navBtns = document.querySelectorAll('.nav-btn');
+
+  // ── Upload 메뉴: Admin 전용 ──
   if(navBtns[4]) navBtns[4].style.display = isAdmin ? '' : 'none';
   var mobUpload = document.getElementById('mob-upload');
   if(mobUpload) mobUpload.style.display = isAdmin ? '' : 'none';
+
+  // ── Settings(Admin) vs Sign Out(일반 유저) ──
+  if(navBtns[5]){
+    navBtns[5].textContent = isAdmin ? '⚙' : 'Sign Out';
+    navBtns[5].onclick = isAdmin
+      ? function(){ showScreen('settings'); closeDrawer(); }
+      : function(){ doLogout(); };
+  }
+  var mobSettings = document.getElementById('mob-settings');
+  if(mobSettings){
+    mobSettings.textContent = isAdmin ? '⚙ Settings' : '🚪 Sign Out';
+    mobSettings.onclick = isAdmin
+      ? function(){ showScreen('settings'); closeDrawer(); }
+      : function(){ doLogout(); };
+  }
+
+  // ── 데이터 관리 / Copy 버튼: Admin 전용 ──
+  var dataMgmt = document.getElementById('settings-data-mgmt');
+  if(dataMgmt) dataMgmt.style.display = isAdmin ? '' : 'none';
+  var copyBtn = document.getElementById('q-copy-btn');
+  if(copyBtn) copyBtn.style.display = isAdmin ? '' : 'none';
 }
 // ─────────────────────────────────────────────────────
 
@@ -2486,7 +2511,6 @@ function loadQuestion(){
   document.getElementById('q-progress-text').textContent=`Question ${S.quizIdx+1} of ${S.quizQueue.length}`;
   document.getElementById('q-session-label').textContent=S.mode.toUpperCase()+' SESSION · 2026 EA EXAM';
   document.getElementById('q-part').textContent=q.part;
-  document.getElementById('q-topic').textContent=q.topic||'General';
   document.getElementById('q-text').textContent=q.text;
 
   const idBadge = document.getElementById('q-id-badge');
@@ -2655,6 +2679,8 @@ function skipQuestion(){
 // ─────────────────────────────────────────────────────────────────
 async function showExplanation(q, isOk, timeout){
   const ec = document.getElementById('explanation-card'); ec.classList.add('visible');
+  const topicBadge = document.getElementById('exp-topic-badge');
+  if(topicBadge) topicBadge.textContent = 'Topic: ' + (q.topic || 'General');
   const banner = document.getElementById('result-banner');
   if(isOk === null || isOk === undefined){
     banner.className = 'result-banner'; banner.textContent = '';
