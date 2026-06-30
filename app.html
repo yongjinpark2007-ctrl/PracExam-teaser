@@ -1750,16 +1750,16 @@ async function loadFromCloud(){
 
     if(qRows && qRows.length > 0){
       S.questions = qRows.map(r => ({
-        id: r.id,
+        id: r.question_id,
         question_id: r.question_id,
         source: r.source || 'cloud',
         text: r.text,
         options: r.options,
         correct: r.correct,
         explanation: r.explanation || '',
-        wrongReasons: r.wrong_reasons || '',
-        taxUpdate2025: r.tax_update_2025 || '',
-        examTip: r.exam_tip || '',
+        wrongReasons: r.wrongreasons || '',
+        taxUpdate2025: r.taxupdate2025 || '',
+        examTip: r.examtip || '',
         part: r.part ? ('Part ' + r.part) : 'Part 1',
         topic: r.topic || 'General',
         outlineCode: r.outline_code || '',
@@ -1865,18 +1865,23 @@ async function uploadQuestionsToCloud(questions){
   const uniqueQuestions = Array.from(
     new Map(questions.map(q => [q.question_id || q.id, q])).values()
   );
+  // ⚠️ 2026-06-30 수정: 신규 스키마는 'Part 1' 문자열이 아니라 int2(1/2/3) 사용.
+  // 별도 'id' 컬럼 없음(question_id가 PK) — 컬럼명도 소문자/언더스코어 없음으로 통일.
+  function partToInt(partStr){
+    var m = { 'Part 1':1, 'Part 2':2, 'Part 3':3, 'Part A':1, 'Part B':2, 'Part C':3 };
+    return m[partStr] || 1;
+  }
   const rows = uniqueQuestions.map(q => ({
-    id:              q.id,
     question_id:     q.question_id || null,
     source:          q.source,
     text:            q.text,
     options:         q.options,
     correct:         q.correct,
     explanation:     q.explanation || null,
-    wrong_reasons:   q.wrongReasons || null,
-    tax_update_2025: q.taxUpdate2025 || null,
-    exam_tip:        q.examTip || null,
-    part:            q.part || 'Part 1',
+    wrongreasons:    q.wrongReasons || null,
+    taxupdate2025:   q.taxUpdate2025 || null,
+    examtip:         q.examTip || null,
+    part:            partToInt(q.part || 'Part 1'),
     topic:           q.topic || 'General',
     outline_code:    q.outlineCode || null,
     difficulty:      (q.difficulty != null && q.difficulty !== '') ? q.difficulty : null,
@@ -1910,10 +1915,10 @@ async function fixQuestionInCloud(q, options = {}) {
   if(!SB_USER) return;
   const updateData = {};
   if (options.explanation !== false) updateData.explanation = q.explanation || null;
-  if (options.taxUpdate !== false) updateData.tax_update_2025 = q.taxUpdate2025 || null;
-  if (options.examTip !== false) updateData.exam_tip = q.examTip || null;
+  if (options.taxUpdate !== false) updateData.taxupdate2025 = q.taxUpdate2025 || null;
+  if (options.examTip !== false) updateData.examtip = q.examTip || null;
   // wrong_reasons는 절대 업데이트하지 않음
-  const { error } = await sb.from('questions').update(updateData).eq('id', q.id);
+  const { error } = await sb.from('questions').update(updateData).eq('question_id', q.id);
   if(error) showToast('⚠️ 클라우드 수정 오류: ' + error.message);
 }
 
@@ -2620,7 +2625,17 @@ function getPool(){
 async function startQuiz(){
   if(!canStartQuiz()) return;
   clearInterval(S.timerInt);
-  let pool=getPool(); if(!pool.length) return;
+  let pool=getPool();
+  if(!pool.length){
+    var hint = '';
+    if(S.subset==='unseen') hint = ' (범위: Unseen — 이미 다 풀어본 문제만 있어서 0개)';
+    else if(S.subset==='practiced') hint = ' (범위: Practiced — 한 번도 안 푼 문제만 있어서 0개)';
+    else if(S.subset==='flagged') hint = ' (범위: Flagged — 깃발 표시한 문제가 없어서 0개)';
+    else if(S.repeatFilter!=='all') hint = ' (반복 횟수 필터: ' + S.repeatFilter + ' 조건에 맞는 문제 없음)';
+    else if(S.mode==='review') hint = ' (학습 모드: Review Wrong — 틀린 문제가 없어서 0개)';
+    showToast('⚠️ 선택한 조건에 맞는 문제가 없습니다.' + hint + ' 범위/모드를 변경해주세요.');
+    return;
+  }
   pool.sort((a,b)=>{const ta=S.answered[a.id]?.times||0,tb=S.answered[b.id]?.times||0;return ta-tb||Math.random()-.5;});
   S.quizQueue=pool.slice(0,S.count).map(q=>q.id);
   
