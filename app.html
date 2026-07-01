@@ -1743,6 +1743,19 @@ function updateSyncStatus(){
 // ══════════════════════════════════════════════════════
 // CLOUD LOAD / SAVE (페이지네이션 적용)
 // ══════════════════════════════════════════════════════
+// ── 일일 한도 리셋 기준 날짜: 사용자 기기 로컬 시간 (2026-07-01 변경) ──
+// 기존 toISOString()은 UTC 자정 기준이라 한국 사용자는 오전 9시에 리셋됐음.
+// 각 사용자의 로컬 자정 기준으로 "YYYY-MM-DD" 반환 (iOS WebKit 안전: 문자열 연결).
+function localDateStr(){
+  var d = new Date();
+  var y = d.getFullYear();
+  var m = d.getMonth() + 1;
+  var day = d.getDate();
+  var mm = (m < 10 ? '0' : '') + m;
+  var dd = (day < 10 ? '0' : '') + day;
+  return y + '-' + mm + '-' + dd;
+}
+
 // ── 무료 체험 / 결제 상태 조회 (2026-06-29 추가) ──
 // Admin(Jay)은 체험 게이트 대상에서 항상 제외.
 async function loadTrialStatus(){
@@ -1763,7 +1776,7 @@ async function loadTrialStatus(){
     S.trialExpired = !S.isPaid && S.trialEndsAt && (new Date(S.trialEndsAt) < new Date());
 
     // ── 일일 한도: 날짜가 바뀌었으면 0으로 리셋 ──
-    const todayStr = new Date().toISOString().slice(0,10);
+    const todayStr = localDateStr();
     if(data.daily_date !== todayStr){
       S.dailyUsed = 0; S.dailyDate = todayStr;
       sb.from('profiles').update({ daily_used: 0, daily_date: todayStr }).eq('id', SB_USER.id)
@@ -1841,7 +1854,7 @@ function consumeDailyQuota(){
   S.dailyUsed = (S.dailyUsed || 0) + 1;
   updateTrialQuotaBanner();
   if(SB_USER){
-    sb.from('profiles').update({ daily_used: S.dailyUsed, daily_date: S.dailyDate || new Date().toISOString().slice(0,10) })
+    sb.from('profiles').update({ daily_used: S.dailyUsed, daily_date: S.dailyDate || localDateStr() })
       .eq('id', SB_USER.id).then(()=>{}).catch(e=>console.warn('daily quota 반영 실패:', e));
   }
 }
