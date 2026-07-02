@@ -859,6 +859,20 @@ html, body {
 
 /* ========== END DASHBOARD V2 ========== */
 
+/* ── Tablet portrait (iPad Portrait 등) — 헤더 압축 ── */
+/* 640px 이하는 아래 mobile 규칙에서 nav 자체를 숨김. 641~900px 범위에서 */
+/* 데스크톱 nav를 유지하되 요소가 겹치거나 밀려나지 않도록 압축한다. */
+@media(min-width:641px) and (max-width:900px){
+  .header{padding:env(safe-area-inset-top) 0.75rem 0;}
+  .header-brand{gap:8px;min-width:0;}
+  .header-sub{display:none;}
+  .header-title{font-size:14px;}
+  .header-right{gap:6px;}
+  .header-nav{gap:1px;}
+  .nav-btn{padding:6px 9px;font-size:12px;}
+  .lang-seg button{padding:5px 8px;font-size:11px;}
+}
+
 @media(max-width:640px){
   /* ── 공통 ── */
   .screen{padding:1rem;overflow-wrap:anywhere;}
